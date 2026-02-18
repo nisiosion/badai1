@@ -2,10 +2,17 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- ダブルタップ拡大防止 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>場代計算</title>
 
 <style>
+html, body {
+  touch-action: manipulation;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   max-width: 500px;
@@ -45,9 +52,9 @@ select, input[type="time"] {
 }
 
 .counter button {
-  width: 50px;
-  height: 50px;
-  font-size: 22px;
+  width: 60px;
+  height: 55px;
+  font-size: 24px;
   border-radius: 10px;
   border: none;
   background: #1976d2;
@@ -55,7 +62,7 @@ select, input[type="time"] {
 }
 
 .count {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
 }
 
@@ -66,7 +73,7 @@ select, input[type="time"] {
 }
 
 .total {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: bold;
   color: #d32f2f;
   text-align: center;
@@ -104,18 +111,19 @@ select, input[type="time"] {
 </div>
 
 <div class="section">
+
 <label>ソフトドリンク（330円）</label>
 <div class="counter">
-<button onclick="change('beer',-1)">−</button>
-<div class="count" id="beer">0</div>
-<button onclick="change('beer',1)">＋</button>
+<button onclick="change('soft',-1)">−</button>
+<div class="count" id="soft">0</div>
+<button onclick="change('soft',1)">＋</button>
 </div>
 
 <label>アルコール（600円）</label>
 <div class="counter">
-<button onclick="change('highball',-1)">−</button>
-<div class="count" id="highball">0</div>
-<button onclick="change('highball',1)">＋</button>
+<button onclick="change('alcohol',-1)">−</button>
+<div class="count" id="alcohol">0</div>
+<button onclick="change('alcohol',1)">＋</button>
 </div>
 
 <label>出前（円）</label>
@@ -127,6 +135,7 @@ select, input[type="time"] {
 <div class="result">
 飲食代合計：<span id="foodTotal">0</span> 円
 </div>
+
 </div>
 
 <div class="section total">
@@ -135,6 +144,7 @@ select, input[type="time"] {
 
 <script>
 const alcoholPrice = 600;
+const softPrice = 330;
 
 function change(id, delta) {
   let value = Number(document.getElementById(id).textContent);
@@ -163,13 +173,12 @@ function calc() {
   const tableTotal = rate * hours;
   document.getElementById("tableTotal").textContent = tableTotal.toLocaleString();
 
-  const beer = Number(document.getElementById("beer").textContent) * alcoholPrice;
-  const highball = Number(document.getElementById("highball").textContent) * alcoholPrice;
-  const shochu = Number(document.getElementById("shochu").textContent) * alcoholPrice;
+  const soft = Number(document.getElementById("soft").textContent) * softPrice;
+  const alcohol = Number(document.getElementById("alcohol").textContent) * alcoholPrice;
   const delivery = Number(document.getElementById("delivery").value);
   const margin = Number(document.getElementById("margin").value);
 
-  const foodTotal = beer + highball + shochu + delivery + margin;
+  const foodTotal = soft + alcohol + delivery + margin;
   document.getElementById("foodTotal").textContent = foodTotal.toLocaleString();
 
   const grandTotal = tableTotal + foodTotal;
