@@ -2,17 +2,83 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>場代計算アプリ</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>場代計算</title>
+
 <style>
-body { font-family: sans-serif; max-width: 400px; margin: auto; }
-input, select { width: 100%; padding: 8px; margin: 5px 0; }
-.result { font-weight: bold; margin-top: 10px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 500px;
+  margin: auto;
+  padding: 15px;
+  background: #f4f4f4;
+}
+
+h2 { text-align: center; }
+
+.section {
+  background: white;
+  padding: 15px;
+  margin-top: 15px;
+  border-radius: 12px;
+}
+
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
+
+select, input[type="time"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.counter button {
+  width: 50px;
+  height: 50px;
+  font-size: 22px;
+  border-radius: 10px;
+  border: none;
+  background: #1976d2;
+  color: white;
+}
+
+.count {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.result {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.total {
+  font-size: 26px;
+  font-weight: bold;
+  color: #d32f2f;
+  text-align: center;
+}
 </style>
 </head>
+
 <body>
 
-<h2>場代計算アプリ</h2>
+<h2>場代計算</h2>
 
+<div class="section">
 <label>開始時間</label>
 <input type="time" id="startTime" onchange="calc()">
 
@@ -20,9 +86,11 @@ input, select { width: 100%; padding: 8px; margin: 5px 0; }
 <input type="time" id="endTime" onchange="calc()">
 
 <div class="result">
-利用時間：<span id="totalHours">0</span> 時間
+利用時間：<span id="hours">0</span> 時間
+</div>
 </div>
 
+<div class="section">
 <label>場代（1時間）</label>
 <select id="rate" onchange="calc()">
   <option value="1880">1880</option>
@@ -30,27 +98,32 @@ input, select { width: 100%; padding: 8px; margin: 5px 0; }
   <option value="3300">3300</option>
 </select>
 
-<label>ソフトドリンク人数（330円）</label>
-<select id="soft" onchange="calc()">
-  <option value="0">0</option>
-  <option value="990">3人 (990円)</option>
-  <option value="1320">4人 (1320円)</option>
-</select>
+<div class="result">
+場代合計：<span id="tableTotal">0</span> 円
+</div>
+</div>
 
-<hr>
-
-<h3>アルコール（1杯600円）</h3>
-
+<div class="section">
 <label>生ビール（600円）</label>
-<input type="number" id="beer" value="0" oninput="calc()">
+<div class="counter">
+<button onclick="change('beer',-1)">−</button>
+<div class="count" id="beer">0</div>
+<button onclick="change('beer',1)">＋</button>
+</div>
 
 <label>ハイボール（600円）</label>
-<input type="number" id="highball" value="0" oninput="calc()">
+<div class="counter">
+<button onclick="change('highball',-1)">−</button>
+<div class="count" id="highball">0</div>
+<button onclick="change('highball',1)">＋</button>
+</div>
 
 <label>焼酎（600円）</label>
-<input type="number" id="shochu" value="0" oninput="calc()">
-
-<hr>
+<div class="counter">
+<button onclick="change('shochu',-1)">−</button>
+<div class="count" id="shochu">0</div>
+<button onclick="change('shochu',1)">＋</button>
+</div>
 
 <label>出前（円）</label>
 <input type="number" id="delivery" value="0" oninput="calc()">
@@ -61,51 +134,52 @@ input, select { width: 100%; padding: 8px; margin: 5px 0; }
 <div class="result">
 飲食代合計：<span id="foodTotal">0</span> 円
 </div>
+</div>
 
-<div class="result">
-合計金額：<span id="grandTotal">0</span> 円
+<div class="section total">
+総合計：<span id="grandTotal">0</span> 円
 </div>
 
 <script>
 const alcoholPrice = 600;
 
+function change(id, delta) {
+  let value = Number(document.getElementById(id).textContent);
+  value += delta;
+  if (value < 0) value = 0;
+  document.getElementById(id).textContent = value;
+  calc();
+}
+
 function calc() {
   const start = document.getElementById("startTime").value;
   const end = document.getElementById("endTime").value;
-
   let hours = 0;
 
   if (start && end) {
-    const startDate = new Date(`2000-01-01T${start}`);
-    let endDate = new Date(`2000-01-01T${end}`);
-
-    if (endDate < startDate) {
-      endDate.setDate(endDate.getDate() + 1);
-    }
-
-    const diffMs = endDate - startDate;
-    const diffHours = diffMs / (1000 * 60 * 60);
-
-    // 30分単位切り上げ
-    hours = Math.ceil(diffHours * 2) / 2;
+    const s = new Date(`2000-01-01T${start}`);
+    let e = new Date(`2000-01-01T${end}`);
+    if (e < s) e.setDate(e.getDate() + 1);
+    const diff = (e - s) / (1000 * 60 * 60);
+    hours = Math.ceil(diff * 2) / 2; // 30分切り上げ
   }
 
-  document.getElementById("totalHours").textContent = hours;
+  document.getElementById("hours").textContent = hours;
 
   const rate = Number(document.getElementById("rate").value);
-  const soft = Number(document.getElementById("soft").value);
+  const tableTotal = rate * hours;
+  document.getElementById("tableTotal").textContent = tableTotal.toLocaleString();
 
-  const beer = Number(document.getElementById("beer").value) * alcoholPrice;
-  const highball = Number(document.getElementById("highball").value) * alcoholPrice;
-  const shochu = Number(document.getElementById("shochu").value) * alcoholPrice;
-
+  const beer = Number(document.getElementById("beer").textContent) * alcoholPrice;
+  const highball = Number(document.getElementById("highball").textContent) * alcoholPrice;
+  const shochu = Number(document.getElementById("shochu").textContent) * alcoholPrice;
   const delivery = Number(document.getElementById("delivery").value);
   const margin = Number(document.getElementById("margin").value);
 
-  const foodTotal = soft + beer + highball + shochu + delivery + margin;
-  const grandTotal = rate * hours + foodTotal;
-
+  const foodTotal = beer + highball + shochu + delivery + margin;
   document.getElementById("foodTotal").textContent = foodTotal.toLocaleString();
+
+  const grandTotal = tableTotal + foodTotal;
   document.getElementById("grandTotal").textContent = grandTotal.toLocaleString();
 }
 </script>
